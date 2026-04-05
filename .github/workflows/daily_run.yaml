@@ -1,32 +1,39 @@
 name: Daily Airbnb Job Matcher
 on:
-    schedule:
-        - cron: "0 13 * * *" # Runs daily at 9:00 AM Toronto time (13:00 UTC)
-    workflow_dispatch: # Allows you to run it manually for testing
+  schedule:
+    - cron: "0 13 * * *" # 9:00 AM Toronto time
+  workflow_dispatch:
 
 jobs:
-    run-pipeline:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.10"
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Install dependencies
-              run: pip install -r requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock" # Best practice if you have a lockfile
 
-            - name: Run Job Matcher
-              env:
-                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-                  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-              run: python main.py
+      - name: Set up Python
+        run: uv python install 3.11
 
-            - name: Commit updated seen_jobs.json
-              run: |
-                  git config --global user.name 'Job-Bot'
-                  git config --global user.email 'bot@github.com'
-                  git add data/seen_jobs.json
-                  git commit -m "Update seen jobs [automated]" || echo "No changes"
-                  git push
+      - name: Run Job Matcher
+        env:
+          GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          USER_NAME: ${{ secrets.USER_NAME }}
+          RESUME_CONTENT: ${{ secrets.RESUME_CONTENT }}
+        # 'uv run' automatically installs dependencies from pyproject.toml
+        run: uv run src/main.py
+
+      - name: Commit updated seen_jobs.json
+        run: |
+          git config --global user.name 'Job-Bot'
+          git config --global user.email 'bot@github.com'
+          git add data/seen_jobs.json
+          git commit -m "Update seen jobs [automated]" || echo "No changes"
+          git push
