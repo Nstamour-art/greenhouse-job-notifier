@@ -1,9 +1,10 @@
 from google import genai
 from dotenv import load_dotenv
-import json
 import re
-from pydantic import BaseModel
-from src.models import Job, MatchedJob, UserProfile, JobMatchResult
+try:
+    from src.models import Job, MatchedJob, UserProfile, JobMatchResult
+except ImportError:
+    from models import Job, MatchedJob, UserProfile, JobMatchResult
 import os
 
 from google.genai import types
@@ -52,7 +53,7 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         
         
         response = client.models.generate_content(
-            model="gemini-3-flash-preview",
+            model="gemini-3-flash-lite-preview",
             contents=prompt,
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_level=types.ThinkingLevel.LOW)
