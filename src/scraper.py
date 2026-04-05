@@ -6,7 +6,7 @@ import requests
 import html
 from bs4 import BeautifulSoup
 
-from models import Job
+from src.models import Job
 
 
 def _get_jobs() -> list:

@@ -1,5 +1,4 @@
 import smtplib
-import os
 from email.message import EmailMessage
 
 def send_job_alert(matched_jobs: list, email_config: dict) -> None:

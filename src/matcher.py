@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import json
 import re
 from pydantic import BaseModel
-from models import Job, MatchedJob, UserProfile, JobMatchResult
+from src.models import Job, MatchedJob, UserProfile, JobMatchResult
 import os
 
 from google.genai import types
