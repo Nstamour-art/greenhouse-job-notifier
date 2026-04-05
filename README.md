@@ -21,7 +21,7 @@ Automatically scrapes job postings from any Greenhouse job board, matches them t
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/airbnb-job-notifier.git
+git clone https://github.com/Nstamour-art/airbnb-job-notifier.git
 cd airbnb-job-notifier
 uv sync
 ```
@@ -55,8 +55,8 @@ uv run main.py
 The included workflow runs daily at 9:00 AM ET. To enable it:
 
 1. Push the repo to GitHub
-2. Go to **Settings → Secrets and variables → Actions**
-3. Add each environment variable from above as a repository secret
+2. Go to **Settings → Environments** and create an environment named `default`
+3. Add each environment variable from above as a secret in the `default` environment
 
 The workflow automatically commits updated `seen_jobs.json` so you won't get repeat notifications.
 
