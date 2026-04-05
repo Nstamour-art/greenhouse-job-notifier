@@ -38,6 +38,7 @@ EMAIL_ADDRESS=your_email@gmail.com
 EMAIL_PASSWORD=your_gmail_app_password
 RECIPIENT_EMAIL=recipient@example.com
 RESUME_CONTENT=Paste your resume text here...
+LOCATION_FILTER=Canada, USA, ...
 ```
 
 `GREENHOUSE_BOARD_TOKEN` is the company identifier in the Greenhouse URL (e.g. `airbnb`, `spotify`, `cloudflare`).

@@ -90,9 +90,9 @@ def scrape_jobs() -> list:
     jobs = _get_jobs()
     seen_jobs = _load_seen_jobs()
     new_jobs = []
-    
+    locations_to_include = os.environ.get("LOCATION_FILTER", "Canada").lower().split(",")
     for job in jobs:
-        if job["location"]["name"] == "Canada" or "remote" in job["location"]["name"].lower():
+        if job["location"]["name"].lower() in locations_to_include or "remote" in job["location"]["name"].lower():
             if job['id'] not in seen_jobs:
                 clean_content = _clean_job_content(job["content"])
                 department_name = None
