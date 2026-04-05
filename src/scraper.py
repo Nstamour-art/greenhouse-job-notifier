@@ -9,14 +9,14 @@ from bs4 import BeautifulSoup
 from models import Job
 
 
-def _get_airbnb_jobs() -> list:
-    """Fetches the list of Airbnb jobs from the Greenhouse API.
+def _get_jobs() -> list:
+    """Fetches job listings from the Greenhouse API for the configured board.
 
     Returns:
         list: A list of job dictionaries.
     """
-
-    url = "https://boards-api.greenhouse.io/v1/boards/airbnb/jobs?content=true"
+    board_token = os.environ.get("GREENHOUSE_BOARD_TOKEN", "airbnb")
+    url = f"https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true"
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()['jobs']
@@ -86,7 +86,7 @@ def scrape_jobs() -> list:
     Returns:
         list: A list of found jobs that were not previously surfaced.
     """
-    jobs = _get_airbnb_jobs()
+    jobs = _get_jobs()
     seen_jobs = _load_seen_jobs()
     new_jobs = []
     
