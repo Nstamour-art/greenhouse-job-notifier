@@ -21,8 +21,8 @@ Automatically scrapes job postings from any Greenhouse job board, matches them t
 ### Installation
 
 ```bash
-git clone https://github.com/Nstamour-art/airbnb-job-notifier.git
-cd airbnb-job-notifier
+git clone https://github.com/Nstamour-art/greenhouse-job-notifier.git
+cd greenhouse-job-notifier
 uv sync
 ```
 
