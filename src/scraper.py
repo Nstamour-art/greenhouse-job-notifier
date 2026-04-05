@@ -16,6 +16,7 @@ def _get_jobs() -> list:
         list: A list of job dictionaries.
     """
     board_token = os.environ.get("GREENHOUSE_BOARD_TOKEN", "airbnb")
+    print(f"Fetching jobs from Greenhouse board: {board_token}...")
     url = f"https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true"
     response = requests.get(url)
     if response.status_code == 200:
