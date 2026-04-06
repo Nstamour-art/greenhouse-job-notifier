@@ -21,6 +21,8 @@ def _get_jobs() -> list:
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()['jobs']
+    elif response.status_code == 404:
+        raise Exception(f"Board '{board_token}' not found. Verify the company uses Greenhouse at: https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs")
     else:
         raise Exception(f"Failed to fetch jobs: {response.status_code} - {response.text}")
 
