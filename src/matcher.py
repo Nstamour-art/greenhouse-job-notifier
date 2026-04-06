@@ -53,7 +53,7 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         
         
         response = client.models.generate_content(
-            model="gemini-3-flash-lite-preview",
+            model="gemini-3.1-flash-lite-preview",
             contents=prompt,
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_level=types.ThinkingLevel.LOW)
