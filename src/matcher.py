@@ -36,6 +36,9 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         Highly relevant jobs should closely match the user's skills and experience as described in their resume, while less relevant jobs may only partially match or not match at all.
         
         IMPORTANT: If the job posting is written in a language the candidate does not speak, it is NOT relevant. Score it 0.
+        If the job is a contract role, it is NOT relevant. Score it 0.
+        Only score highly if the role is a strong match and seems like a role the candidate would be interested in based on their resume.
+        The candidate wants role that are a progressive step forward in their career, so if the role seems like a lateral move or a step down, score it lower even if there is a skills match.
         
         Job Description:
         Title: {job.title}

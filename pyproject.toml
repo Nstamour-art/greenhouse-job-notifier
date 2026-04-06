@@ -8,6 +8,7 @@ dependencies = [
     "bs4>=0.0.2",
     "dotenv>=0.9.9",
     "google-genai>=1.70.0",
+    "langdetect>=1.0.9",
     "pydantic>=2.12.5",
     "requests>=2.33.1",
 ]

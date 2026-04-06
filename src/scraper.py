@@ -5,8 +5,28 @@ import os
 import requests
 import html
 from bs4 import BeautifulSoup
+from langdetect import detect, LangDetectException
 
-from src.models import Job
+try:
+    from src.models import Job
+except ImportError:
+    # If running as a standalone script, adjust the import path
+    from models import Job
+
+# langdetect uses ISO 639-1 codes; map common language names to codes
+LANGUAGE_CODES = {
+    "english": "en",
+    "french": "fr",
+    "spanish": "es",
+    "german": "de",
+    "portuguese": "pt",
+    "italian": "it",
+    "dutch": "nl",
+    "japanese": "ja",
+    "korean": "ko",
+    "chinese": "zh-cn",
+    "mandarin": "zh-cn",
+}
 
 
 def _get_jobs() -> list:
@@ -92,6 +112,25 @@ def _is_contract_role(title: str, content: str) -> bool:
     text = f"{title} {content}".lower()
     return any(kw in text for kw in CONTRACT_KEYWORDS)
 
+def _detect_language(text: str) -> str | None:
+    """Detects the language of the given text. Returns ISO 639-1 code or None on failure."""
+    try:
+        return detect(text)
+    except LangDetectException:
+        return None
+
+def _matches_user_language(content: str) -> bool:
+    """Returns True if the job content language matches the user's configured language(s)."""
+    user_langs = os.environ.get("USER_LANGUAGE", "English").lower().split(",")
+    user_langs = [lang.strip() for lang in user_langs if lang.strip()]
+    if not user_langs:
+        return True  # No language filter configured
+    user_codes = {LANGUAGE_CODES.get(lang, lang) for lang in user_langs}
+    detected = _detect_language(content)
+    if detected is None:
+        return True  # Can't detect, let the LLM decide
+    return detected in user_codes
+
 def scrape_jobs() -> list:
     """Scrape jobs and return a list of job objects if any new jobs were found.
 
@@ -110,7 +149,9 @@ def scrape_jobs() -> list:
             if job['id'] not in seen_jobs:
                 clean_content = _clean_job_content(job["content"])
                 if _is_contract_role(job['title'], clean_content):
-                    print(f"  Skipping contract role: {job['title']}")
+                    seen_jobs.append(job['id'])
+                    continue
+                if not _matches_user_language(clean_content):
                     seen_jobs.append(job['id'])
                     continue
                 department_name = None
