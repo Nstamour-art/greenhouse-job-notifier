@@ -1,7 +1,9 @@
 import smtplib
 from email.message import EmailMessage
 
-def send_job_alert(matched_jobs: list, email_config: dict) -> None:
+from src.models import MatchedJob
+
+def send_job_alert(matched_jobs: list[MatchedJob], email_config: dict) -> None:
     # Retrieve credentials from GitHub Secrets
     EMAIL_ADDRESS = email_config.get('EMAIL_ADDRESS')
     EMAIL_PASSWORD = email_config.get('EMAIL_PASSWORD') # App Password, not your login
@@ -21,15 +23,15 @@ def send_job_alert(matched_jobs: list, email_config: dict) -> None:
     body = "Here are the relevant roles at Airbnb based on your resume:\n\n"
     
     for job in matched_jobs:
-        title = job['title']
-        location = job['location']['name']
-        url = job['absolute_url']
+        title = job.job.title
+        location = job.job.location
+        url = job.job.url
         
         body += f"TITLE: {title}\n"
         body += f"LOCATION: {location}\n"
         body += f"LINK: {url}\n"
-        body += f"REASON: {job['match_reason']}\n"
-        body += f"RELEVANCE SCORE: {job['relevance_score']:.2f}\n"
+        body += f"REASON: {job.llm_explanation}\n"
+        body += f"RELEVANCE SCORE: {job.relevance_score:.2f}\n"
         body += "-" * 30 + "\n\n"
 
     msg.set_content(body)
