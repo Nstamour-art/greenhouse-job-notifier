@@ -32,7 +32,7 @@ Create a `.env` file in the project root:
 
 ```
 GENAI_API_KEY=your_google_ai_api_key
-GREENHOUSE_BOARD_TOKEN=airbnb
+GREENHOUSE_BOARD_TOKEN=job_board
 ENV_NAME=default
 USER_NAME=Your Name
 USER_LANGUAGE=English
