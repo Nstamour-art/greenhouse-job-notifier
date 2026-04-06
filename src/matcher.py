@@ -33,6 +33,7 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         You are a job matching assistant.
         
         Given the following job description, user profile, and resume, determine how relevant the job is to the user and provide an explanation for your relevance score.
+        Highly relevant jobs should closely match the user's skills and experience as described in their resume, while less relevant jobs may only partially match or not match at all.
         
         Job Description:
         Title: {job.title}
@@ -44,7 +45,7 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         Name: {user_profile.name}
         Resume Text: {resume}
         
-        Please provide a relevance score between 0 and 1, where 0 means not relevant at all and 1 means highly relevant. Also, provide a brief explanation for the score.
+        Please provide a relevance score between 0 and 1, where 0 means not relevant at all and 1 means highly relevant. Also, provide a brief explanation for the score (under 50 words).
         Return as a JSON object with the following format:
 {{    "relevance_score": float,
     "explanation": string
