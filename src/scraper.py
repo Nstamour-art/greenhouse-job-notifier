@@ -45,11 +45,11 @@ def _clean_job_content(raw_html) -> str:
     
     return clean_text
 
-def _load_seen_jobs(filename="seen_jobs.json") -> list:
+def _load_seen_jobs(env_name: str = "default") -> list:
     """Loads the seen jobs ID from a JSON file. If the file doesn't exist, it returns an empty list.
     
     Args:
-        filename (str, optional): The name of the file to load the seen jobs from. Defaults to "seen_jobs.json".
+        env_name (str, optional): Environment name for the seen jobs file. Defaults to "default".
 
     Returns:
         list: A list of seen job IDs.
@@ -57,6 +57,7 @@ def _load_seen_jobs(filename="seen_jobs.json") -> list:
     directory = "./data"
     if not os.path.exists(directory):
         os.makedirs(directory)
+    filename = f"seen_jobs_{env_name}.json"
     filepath = os.path.join(directory, filename)
     try:
         with open(filepath, "r") as f:
@@ -64,12 +65,12 @@ def _load_seen_jobs(filename="seen_jobs.json") -> list:
     except FileNotFoundError:
         return []
     
-def _save_seen_jobs(seen_jobs, filename="seen_jobs.json") -> None:
+def _save_seen_jobs(seen_jobs, env_name: str = "default") -> None:
     """Saves the seen jobs ID as a list
 
     Args:
         seen_jobs (list): List of seen job IDs.
-        filename (str, optional): The name of the file to save the seen jobs. Defaults to "seen_jobs.json".
+        env_name (str, optional): Environment name for the seen jobs file. Defaults to "default".
     
     Returns:
         None
@@ -77,9 +78,17 @@ def _save_seen_jobs(seen_jobs, filename="seen_jobs.json") -> None:
     directory = "./data"
     if not os.path.exists(directory):
         os.makedirs(directory)
+    filename = f"seen_jobs_{env_name}.json"
     filepath = os.path.join(directory, filename)
     with open(filepath, "w") as f:
         json.dump(seen_jobs, f, indent=4)
+
+CONTRACT_KEYWORDS = ["contract", "contractor", "freelance", "temporary", "temp ", "part-time", "part time", "intern "]
+
+def _is_contract_role(title: str, content: str) -> bool:
+    """Returns True if the job appears to be a contract/non-full-time role."""
+    text = f"{title} {content}".lower()
+    return any(kw in text for kw in CONTRACT_KEYWORDS)
 
 def scrape_jobs() -> list:
     """Scrape jobs and return a list of job objects if any new jobs were found.
@@ -87,14 +96,21 @@ def scrape_jobs() -> list:
     Returns:
         list: A list of found jobs that were not previously surfaced.
     """
+    env_name = os.environ.get("ENV_NAME", "default")
     jobs = _get_jobs()
-    seen_jobs = _load_seen_jobs()
+    seen_jobs = _load_seen_jobs(env_name)
     new_jobs = []
     locations_to_include = os.environ.get("LOCATION_FILTER", "Canada").lower().split(",")
+    locations_to_include = [loc.strip() for loc in locations_to_include]
     for job in jobs:
-        if job["location"]["name"].lower() in locations_to_include or "remote" in job["location"]["name"].lower():
+        job_location = job["location"]["name"].lower()
+        if any(loc in job_location for loc in locations_to_include) or "remote" in job_location:
             if job['id'] not in seen_jobs:
                 clean_content = _clean_job_content(job["content"])
+                if _is_contract_role(job['title'], clean_content):
+                    print(f"  Skipping contract role: {job['title']}")
+                    seen_jobs.append(job['id'])
+                    continue
                 department_name = None
                 if job['departments'] and len(job['departments']) > 1:
                     department_name = f"{job['departments'][0]['name']} - {job['departments'][1]['name']}"
@@ -112,7 +128,7 @@ def scrape_jobs() -> list:
                 ))
                 seen_jobs.append(job['id'])
     
-    _save_seen_jobs(seen_jobs)
+    _save_seen_jobs(seen_jobs, env_name)
     return new_jobs
 
 if __name__ == "__main__":

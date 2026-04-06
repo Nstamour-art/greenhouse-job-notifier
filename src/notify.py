@@ -1,9 +1,9 @@
 import smtplib
 from email.message import EmailMessage
 
-from src.models import MatchedJob
+from src.models import MatchedJob, UserProfile
 
-def send_job_alert(matched_jobs: list[MatchedJob], email_config: dict) -> None:
+def send_job_alert(matched_jobs: list[MatchedJob], user: UserProfile, email_config: dict) -> None:
     # Retrieve credentials from GitHub Secrets
     EMAIL_ADDRESS = email_config.get('EMAIL_ADDRESS')
     EMAIL_PASSWORD = email_config.get('EMAIL_PASSWORD') # App Password, not your login
@@ -13,14 +13,16 @@ def send_job_alert(matched_jobs: list[MatchedJob], email_config: dict) -> None:
         print("No matches today, skipping email.")
         return
 
+    board_token = email_config.get('GREENHOUSE_BOARD_TOKEN', 'greenhouse')
+
     # Create the email container
     msg = EmailMessage()
-    msg['Subject'] = f"Daily Airbnb Job Match: {len(matched_jobs)} Roles Found"
+    msg['Subject'] = f"Daily {board_token.title()} Job Match: {len(matched_jobs)} Roles Found"
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = TO_EMAIL
 
     # Build the body text
-    body = "Here are the relevant roles at Airbnb based on your resume:\n\n"
+    body = f"Good Morning {user.name.split()[0]}!\n\nHere are the relevant roles from {board_token.title()} based on your resume:\n\n"
     
     for job in matched_jobs:
         title = job.job.title

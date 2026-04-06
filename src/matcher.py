@@ -35,6 +35,8 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         Given the following job description, user profile, and resume, determine how relevant the job is to the user and provide an explanation for your relevance score.
         Highly relevant jobs should closely match the user's skills and experience as described in their resume, while less relevant jobs may only partially match or not match at all.
         
+        IMPORTANT: If the job posting is written in a language the candidate does not speak, it is NOT relevant. Score it 0.
+        
         Job Description:
         Title: {job.title}
         Department: {job.department}
@@ -43,6 +45,7 @@ def match_jobs_to_user(jobs: list[Job], user_profile: UserProfile, resume: str) 
         
         User Profile:
         Name: {user_profile.name}
+        Languages: {os.environ.get('USER_LANGUAGE', 'English')}
         Resume Text: {resume}
         
         Please provide a relevance score between 0 and 1, where 0 means not relevant at all and 1 means highly relevant. Also, provide a brief explanation for the score (under 50 words).

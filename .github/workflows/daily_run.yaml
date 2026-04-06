@@ -1,13 +1,21 @@
-name: Daily Airbnb Job Matcher
+name: Daily Job Matcher
 on:
   schedule:
     - cron: "0 13 * * *" # 9:00 AM Toronto time
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run (or 'all')"
+        required: false
+        default: "all"
 
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    environment: default
+    strategy:
+      matrix:
+        environment: [default] # Add more environments here, e.g. [default, spotify-env]
+    environment: ${{ matrix.environment }}
     permissions:
       contents: write
     steps:
@@ -17,28 +25,30 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "uv.lock" # Best practice if you have a lockfile
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
         run: uv python install 3.11
 
       - name: Run Job Matcher
         env:
+          ENV_NAME: ${{ matrix.environment }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           USER_NAME: ${{ secrets.USER_NAME }}
+          USER_LANGUAGE: ${{ secrets.USER_LANGUAGE }}
           RESUME_CONTENT: ${{ secrets.RESUME_CONTENT }}
           GREENHOUSE_BOARD_TOKEN: ${{ secrets.GREENHOUSE_BOARD_TOKEN }}
+          LOCATION_FILTER: ${{ secrets.LOCATION_FILTER }}
           PYTHONUNBUFFERED: "1"
-        # 'uv run' automatically installs dependencies from pyproject.toml
         run: uv run ./main.py
 
-      - name: Commit updated seen_jobs.json
+      - name: Commit updated seen_jobs
         run: |
           git config --global user.name 'Job-Bot'
           git config --global user.email 'bot@github.com'
-          git add data/seen_jobs.json
-          git commit -m "Update seen jobs [automated]" || echo "No changes"
+          git add data/
+          git commit -m "Update seen jobs [${{ matrix.environment }}] [automated]" || echo "No changes"
           git push

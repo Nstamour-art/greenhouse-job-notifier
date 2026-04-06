@@ -31,10 +31,12 @@ def main():
     print(f"Matched {len(matched_jobs)} jobs with relevance scores.")
     # Step 4: Send email notification with matched jobs
     print("Sending email notification...")
-    send_job_alert(matched_jobs, email_config={
+    send_job_alert(matched_jobs, user=user_profile, email_config={
         "EMAIL_ADDRESS": os.environ.get('EMAIL_ADDRESS'),
         "EMAIL_PASSWORD": os.environ.get('EMAIL_PASSWORD'),
-        "RECIPIENT_EMAIL": os.environ.get('RECIPIENT_EMAIL')
+        "RECIPIENT_EMAIL": os.environ.get('RECIPIENT_EMAIL'),
+        "ENV_NAME": os.environ.get('ENV_NAME', 'default'),
+        "GREENHOUSE_BOARD_TOKEN": os.environ.get('GREENHOUSE_BOARD_TOKEN', 'greenhouse'),
     })
 
 

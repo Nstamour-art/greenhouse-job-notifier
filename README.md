@@ -5,7 +5,7 @@ Automatically scrapes job postings from any Greenhouse job board, matches them t
 ## How It Works
 
 1. **Scrape** — Fetches current job listings from a configurable Greenhouse board
-2. **Filter** — Skips jobs you've already seen (tracked in `data/seen_jobs.json`)
+2. **Filter** — Skips previously seen jobs, contract/non-full-time roles, and jobs in languages the candidate doesn't speak
 3. **Match** — Uses Google Gemini to score each job's relevance to your resume
 4. **Notify** — Sends an email summary of matched jobs with relevance scores and explanations
 
@@ -33,15 +33,22 @@ Create a `.env` file in the project root:
 ```
 GENAI_API_KEY=your_google_ai_api_key
 GREENHOUSE_BOARD_TOKEN=airbnb
+ENV_NAME=default
 USER_NAME=Your Name
+USER_LANGUAGE=English
 EMAIL_ADDRESS=your_email@gmail.com
 EMAIL_PASSWORD=your_gmail_app_password
 RECIPIENT_EMAIL=recipient@example.com
 RESUME_CONTENT=Paste your resume text here...
-LOCATION_FILTER=Canada, USA, ...
+LOCATION_FILTER=Canada
 ```
 
-`GREENHOUSE_BOARD_TOKEN` is the company identifier in the Greenhouse URL (e.g. `airbnb`, `spotify`, `cloudflare`).
+| Variable | Description |
+|---|---|
+| `GREENHOUSE_BOARD_TOKEN` | Company identifier in the Greenhouse URL (e.g. `airbnb`, `spotify`, `cloudflare`) |
+| `ENV_NAME` | Name for this configuration. Each environment gets its own `seen_jobs_{name}.json` |
+| `USER_LANGUAGE` | Candidate's language(s) — jobs in other languages are filtered out by the LLM |
+| `LOCATION_FILTER` | Comma-separated locations to include (also matches "remote" automatically) |
 
 ## Usage
 
@@ -56,10 +63,21 @@ uv run main.py
 The included workflow runs daily at 9:00 AM ET. To enable it:
 
 1. Push the repo to GitHub
-2. Go to **Settings → Environments** and create an environment named `default`
-3. Add each environment variable from above as a secret in the `default` environment
+2. Go to **Settings → Environments** and create an environment (e.g. `default`)
+3. Add each environment variable from above as a secret in that environment
 
-The workflow automatically commits updated `seen_jobs.json` so you won't get repeat notifications.
+#### Multiple Environments
+
+To track multiple job boards or users, create additional GitHub environments (e.g. `spotify-jobs`) with their own secrets, then add the environment name to the matrix in [.github/workflows/daily_run.yaml](.github/workflows/daily_run.yaml):
+
+```yaml
+matrix:
+  environment: [default, spotify-jobs]
+```
+
+Each environment gets its own `seen_jobs_{name}.json` file so they track independently.
+
+The workflow automatically commits updated seen jobs files so you won't get repeat notifications.
 
 ## Project Structure
 
@@ -71,5 +89,5 @@ src/
   notify.py          # Sends email alerts via Gmail SMTP
   models.py          # Pydantic data models
 data/
-  seen_jobs.json     # Tracks previously seen job IDs
+  seen_jobs_*.json   # Tracks previously seen job IDs (per environment)
 ```
