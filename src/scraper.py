@@ -145,7 +145,7 @@ def scrape_jobs() -> list:
     locations_to_include = [loc.strip() for loc in locations_to_include]
     for job in jobs:
         job_location = job["location"]["name"].lower()
-        if any(loc in job_location for loc in locations_to_include) or "remote" in job_location:
+        if any(loc in job_location for loc in locations_to_include):
             if job['id'] not in seen_jobs:
                 clean_content = _clean_job_content(job["content"])
                 if _is_contract_role(job['title'], clean_content):
